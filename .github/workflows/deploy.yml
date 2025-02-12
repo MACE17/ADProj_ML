@@ -13,9 +13,10 @@ jobs:
     - name: 🚀 Checkout Repository
       uses: actions/checkout@v4
 
-    - name: 🔧 Set up Docker
+    - name: 🔧 Set up Docker (Fix containerd conflict)
       run: |
         sudo apt-get update
+        sudo apt-get remove -y containerd.io || true
         sudo apt-get install -y docker.io
 
     - name: 🏗️ Build Docker Image
