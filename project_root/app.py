@@ -40,4 +40,6 @@ def predict_route():
 
 if __name__ == "__main__":
     debug_mode = os.getenv("FLASK_DEBUG", "False").lower() == "true"
-    app.run(host="0.0.0.0", port=5000, debug=debug_mode)  # ✅ 改成可配置的
+    host = os.getenv("FLASK_HOST", "127.0.0.1")  # 默认只监听本机，生产环境可配置
+    
+    app.run(host=host, port=5000, debug=debug_mode)
