@@ -1,0 +1,63 @@
+name: Deploy ML API to AWS
+
+on:
+  push:
+    branches:
+      - main  # 只有 push 到 main 分支时触发
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 🚀 Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: 🔧 Set up Docker
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker.io
+
+    - name: 🏗️ Build Docker Image
+      run: |
+        docker build -t my_ml_app .
+
+    - name: 🖥️ SSH into EC2 and Deploy
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: 18.138.232.122
+        username: ubuntu
+        key: -----BEGIN RSA PRIVATE KEY-----
+            MIIEpQIBAAKCAQEA3RBPurgM1TfrMXgO4b1U7bWpzPOliGij+v+J7zJR8+YMfODi
+            EhTP7bGJRH+6uwnXaa5kk4W0D8Zgh1Ix3K/JLKgYPd8+Jmv11IYyVlGkF1dAQyEP
+            +inqWtDfkqfuLavs/3biugL8kc5hA26/xgQtLi3VJvym9bBHadJWYho6nfdPNx1r
+            31B+W6seoKBy0DOpyWEzMw7WYzs7brp9nin8Oo7jxkFity+zHPE2PESQqsOi34Pz
+            cSVUSo0uld3dbC12OjrW2wN7faanQWEWCMYbTdlvMoLRmpu0lp6N301fp3I7K2W+
+            FeJf6/3r5G0mXW93DT4DtZox5FrNaFo5Oh3HWwIDAQABAoIBAQDN1YhHVWQtjBmk
+            QCOrMT1I8OOgACVbdANrjFCEthf0v3lVNZeKOnK44ZvsefoGec1ni4f+jHnyTkZG
+            +dOPpuXsfL/FrH4UDGYjcqigEvh0+zrMxpY32ptp4B6sUUzGndTYsXu+s1U09jMC
+            nTZXTEA9RVO5L3rOPUrhT4Y7Ziy6M3aWGQsWcG/bqSqkfzwcc8W7DlahyghWPzJc
+            MMK5wzxlblXA1OIhv/5sA1cnBqcZJhI8UyH/sBb7gPsPjWan7V7yev/vRAJKKI9k
+            V1IYYNnAKjuYRwR7k3K9Zpy3aT3KaLDFrMT4+KtHNV8LTKzzd60deUe1a4ZD6huf
+            dGt95YEBAoGBAPswAcfcQARLr/edmp5smLIcjkwOLS5I2/6cMFMKDKyJghlGgUHt
+            8QRW1C2LpS6jBn5DbUIZmrQcUsZntc0fsDfd8Wdk9+QWbcXrHbUAE5Mj6ofoukEy
+            BZZpJPXt18LaLWDtsy8RmjnAL7r6+ypPX7Tvi3hGlCCGQS2c4L6aP5LBAoGBAOFM
+            jpfBeFcstsTrvWjO+DfB81u8nGj2xgA4lEoqklTuzOSdDjjWukxJgiIx/KItARDm
+            IwAIQG9RBfs0DZMB7Gm24wUtuFoaJO4AsdqULPsomWXSazevj6w3Jt82F9yA2vxU
+            aYrjxT2jvmQOm4qQyBfgxeEuSVXLNR8c4vWX1Y0bAoGBAM18V2iVgHVDKZ/qeWuy
+            sTO78pi7XDCp//aI9WtpJDcdgqWErQcvTOTc11SvEaFWUmCGbmINqiY/qWOPwgUd
+            MD5zvSF1Uulvg7vOfI3ukxTi4+Ds/TmKX1HNkCPzv3cynr7VlakiwEUQOLvAyCmz
+            pzrQYAszycfVrIpQ9PZYHzvBAoGAI6cczZEVPR5bUfBISgSurQwpObQwQEAE91X8
+            yXvRKlWb4PWloYMBej8Ls+ObKgLbL1Rr535my/bTbnw/RatBQT1q0Y/5o3CNtYgw
+            nPlj4N7832scAnTq1ILpyNrjjcZqYRHunccLmISIBYd2P8hHkdfFGKxdeJEut9y3
+            YcwERE8CgYEA4ShHPcfTFjq5ga8gciNxiERLTJOAFHbQ2b1oAdCTQ+skBW9y990+
+            ecvFlybgxciW2hIac9nZsNYpfTDbkwYSbsGiltiEuaQ2fyUraSm4XX9DTe7j0trD
+            /ybXG9y+EcQmk4qWSpsuMwazKgXaPNOoaHLKY7MhZK1oE+coZ1hzBM0=
+            -----END RSA PRIVATE KEY-----
+        script: |
+          cd ~/project_root
+          git pull origin main  # 获取最新代码
+          docker stop my_ml_app || true
+          docker rm my_ml_app || true
+          docker build -t my_ml_app .
+          docker run -d -p 5000:5000 --name my_ml_app my_ml_app
