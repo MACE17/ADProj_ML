@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from models.bert_pca import get_bert_embedding
 from models.xgb_model import predict
 from utils.data_processing import clean_text
@@ -12,6 +12,16 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     return "Hello, this is my API!", 200
+
+@app.after_request
+def add_security_headers(response: Response):
+    response.headers["X-Frame-Options"] = "DENY"  # 防止 Clickjacking
+    response.headers["X-Content-Type-Options"] = "nosniff"  # 防止 MIME 类型混淆
+    response.headers["Server"] = "Hidden"  # 隐藏服务器信息
+    response.headers["Content-Security-Policy"] = "default-src 'self'"  # 限制 CSP 访问
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"  # 关闭敏感权限
+    response.headers["Cross-Origin-Resource-Policy"] = "same-origin"  # 防止 Spectre 攻击
+    return response
 
 @app.route("/predict", methods=["POST"])
 def predict_route():
