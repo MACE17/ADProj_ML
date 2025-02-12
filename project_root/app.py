@@ -2,6 +2,10 @@ from flask import Flask, request, jsonify
 from models.bert_pca import get_bert_embedding
 from models.xgb_model import predict
 from utils.data_processing import clean_text
+import os
+debug_mode = os.getenv("FLASK_DEBUG", "False").lower() == "true"
+host = os.getenv("FLASK_HOST", "127.0.0.1")  # 默认只监听本机
+port = int(os.getenv("FLASK_PORT", "5000"))
 
 app = Flask(__name__)
 
@@ -35,4 +39,5 @@ def predict_route():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    debug_mode = os.getenv("FLASK_DEBUG", "False").lower() == "true"
+    app.run(host="0.0.0.0", port=5000, debug=debug_mode)  # ✅ 改成可配置的
