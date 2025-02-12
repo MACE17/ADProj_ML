@@ -16,7 +16,8 @@ jobs:
     - name: 🔧 Set up Docker (Fix containerd conflict)
       run: |
         sudo apt-get update
-        sudo apt-get remove -y containerd.io || true
+        sudo apt-get remove -y containerd.io containerd || true
+        sudo apt-get autoremove -y
         sudo apt-get install -y docker.io
 
     - name: 🏗️ Build Docker Image
